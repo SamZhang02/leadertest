@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Which Leader Are You Most Like?</title>
+<style>
+  :root{
+    --bg:#f6efe4;
+    --bg2:#efe3d2;
+    --panel:#fffaf2;
+    --card:#fff8ee;
+    --line:#d8c7b2;
+    --text:#3a2b22;
+    --muted:#7d6758;
+    --accent:#b86a4a;
+    --accent-2:#7b9e78;
+    --accent-3:#d39d52;
+    --shadow:0 12px 30px rgba(92,63,44,.10);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Georgia, serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, #fff8ee 0%, rgba(255,248,238,0) 35%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    min-height:100vh;
+  }
+  .container{max-width:920px;margin:0 auto;padding:24px 16px 60px}
+  .hero,.panel,.question-card,.result-card{
+    background:rgba(255,250,242,.92);
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow:var(--shadow);
+  }
+  .hero{padding:28px 24px;margin-bottom:18px}
+  h1{
+    margin:0 0 8px;
+    font-size:clamp(28px,5vw,42px);
+    line-height:1.1;
+    letter-spacing:.3px;
+  }
+  .subtitle{margin:0;color:var(--muted);font-size:15px}
+  .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .tag{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px;border-radius:999px;
+    background:#f9efdf;border:1px solid #e5d5be;color:#8a5a3d;
+    font-size:13px;
+  }
+  .panel{padding:16px 18px;margin-bottom:16px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .progress-wrap{margin-top:12px}
+  .progress-track{
+    width:100%;height:10px;border-radius:999px;background:#eadcca;overflow:hidden;
+    border:1px solid #dcc7aa;
+  }
+  .progress-bar{
+    height:100%;width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent-3),var(--accent-2));
+    transition:width .25s ease;
+  }
+  .question-card{padding:22px 20px}
+  .q-kicker{font-size:12px;letter-spacing:.12em;color:#9c7d67;text-transform:uppercase}
+  .q-title{margin:6px 0 6px;font-size:26px;line-height:1.25}
+  .q-desc{margin:0 0 16px;color:var(--muted);font-size:14px}
+  .options{display:grid;gap:10px}
+  .option{
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:14px 14px;
+    background:var(--card);
+    cursor:pointer;
+    transition:.18s ease;
+    user-select:none;
+  }
+  .option:hover{
+    transform:translateY(-1px);
+    border-color:#c9ae92;
+    background:#fff4e7;
+  }
+  .option.selected{
+    border-color:var(--accent);
+    background:#fdf0e5;
+    box-shadow:0 0 0 2px rgba(184,106,74,.12) inset;
+  }
+  .hint{margin-top:12px;font-size:13px;color:var(--muted)}
+  .likert-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .rank-list{display:grid;gap:10px}
+  .rank-item{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    padding:12px 14px;background:var(--card);
+    border:1px solid var(--line);border-radius:16px;
+  }
+  .rank-actions{display:flex;gap:8px}
+  .btns{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px}
+  button{
+    border:none;border-radius:16px;padding:12px 18px;
+    font-weight:700;font-family:inherit;font-size:15px;cursor:pointer;
+    transition:.18s ease;
+  }
+  .primary{
+    color:#fff;
+    background:linear-gradient(135deg,var(--accent),#c98562);
+    box-shadow:0 8px 20px rgba(184,106,74,.22);
+  }
+  .primary:hover{transform:translateY(-1px)}
+  .secondary{
+    color:var(--text);
+    background:#f4eadc;border:1px solid var(--line);
+  }
+  .secondary:hover{background:#efe2d0}
+  .ghost{
+    color:var(--muted);
+    background:transparent;border:1px dashed var(--line);
+  }
+  .result-card{display:none;padding:22px 20px;margin-top:18px}
+  .result-head{display:grid;grid-template-columns:180px 1fr;gap:18px;align-items:start}
+  .portrait{
+    width:180px;height:230px;border-radius:22px;overflow:hidden;
+    border:1px solid var(--line);background:#efe2d0;
+  }
+  .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+  .result-name{margin:4px 0 8px;font-size:34px;line-height:1.1}
+  .badges,.axes{display:flex;gap:8px;flex-wrap:wrap}
+  .pill{
+    display:inline-block;padding:6px 10px;border-radius:999px;
+    background:#f8eddc;border:1px solid #e4d2b8;color:#8a5a3d;font-size:12px;
+  }
+  .result-sub{margin:0;color:var(--muted)}
+  .section-title{margin:22px 0 10px;font-size:20px}
+  .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .mini-card{
+    padding:14px;border-radius:18px;background:var(--card);
+    border:1px solid var(--line);
+  }
+  .share-box{
+    margin-top:14px;padding:14px 16px;border-radius:18px;
+    background:#f8eddc;border:1px solid #e2cfb1;
+  }
+  .footer-note{margin-top:12px;color:var(--muted);font-size:13px}
+  @media (max-width:760px){
+    .result-head{grid-template-columns:1fr}
+    .portrait{width:100%;max-width:260px;height:320px}
+    .likert-row{grid-template-columns:1fr}
+    .mini-grid{grid-template-columns:1fr}
+    .btns{justify-content:flex-start}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <h1>Which Leader Are You Most Like?</h1>
+    <p class="subtitle">This isn't just a simple personality test, but an archetype match of political style and decision-making preferences. Takes about 3–5 minutes, 18 questions.</p>
+    <div class="meta">
+      <span class="tag">Either-Or</span>
+      <span class="tag">Multiple Choice</span>
+      <span class="tag">Scenario</span>
+      <span class="tag">Policy Lean</span>
+      <span class="tag">Ranking</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="topbar">
+      <div>
+        <strong id="progressText">Question 1 / 18</strong>
+        <div class="subtitle" id="typeText">Type: True/False</div>
+      </div>
+      <button class="secondary" id="resetBtn" type="button">Reset</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-bar" id="progressBar"></div></div>
+    </div>
+  </div>
+
+  <div id="questionCard" class="question-card"></div>
+
+  <div class="btns">
+    <div>
+      <button class="secondary" id="prevBtn" type="button">Previous</button>
+      <button class="primary" id="nextBtn" type="button">Next</button>
+    </div>
+  </div>
+
+  <div id="resultWrap" class="result-card">
+    <div class="result-head">
+      <div class="portrait"><img id="leaderImg" alt="Portrait" /></div>
+      <div>
+        <div class="badges" id="leaderBadges"></div>
+        <h2 class="result-name" id="leaderName"></h2>
+        <p class="result-sub" id="leaderBio"></p>
+        <div class="axes" id="leaderAxes" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <h3 class="section-title">Why this person?</h3>
+    <div class="mini-card"><p id="whyText" style="margin:0"></p></div>
+
+    <h3 class="section-title">Brief Summary</h3>
+    <div class="mini-card"><p id="leaderSummary" style="margin:0"></p></div>
+
+    <h3 class="section-title">Top 2 Closest Matches</h3>
+    <div class="mini-grid" id="topMatches"></div>
+
+    <div class="share-box">
+      <strong>Shareable Text</strong>
+      <p id="shareText" style="margin:8px 0 0"></p>
+    </div>
+
+    <p class="footer-note">The test results on this website are for entertainment purposes only and do not participate in any political stance or discussion of real-life figures.</p>
+    <button class="primary" id="restartBtn" type="button" style="margin-top:16px;">Test Again</button>
+  </div>
+</div>
+
+<script>
+
+const dims = ["power","logic","conflict","emotion","order","ideology","mobilization","force","development"];
+
+function getUserTypes(user){
+  const scores = {
+    "Mobilizer": user.emotion + user.mobilization,
+    "Strongman": user.power + user.force,
+    "Technocrat": user.logic + user.order,
+    "Developmental": user.development + user.order,
+    "Ideological": user.ideology + user.mobilization
+  };
+  return Object.entries(scores)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,2)
+    .map(x=>x[0]);
+}
+
+const typeAliasMap = {
+  "Mobilizer":"Mobilizer",
+  "Charismatic":"Mobilizer",
+  "Populist":"Mobilizer",
+  "Wartime":"Mobilizer",
+  "Impulsive":"Mobilizer",
+  "Combative":"Mobilizer",
+  "Strongman":"Strongman",
+  "Controller":"Strongman",
+  "Statist":"Strongman",
+  "Technocrat":"Technocrat",
+  "Institutional":"Technocrat",
+  "Coordinator":"Technocrat",
+  "Strategic":"Technocrat",
+  "Realist":"Technocrat",
+  "Reformist":"Technocrat",
+  "Developmental":"Developmental",
+  "Ideological":"Ideological",
+  "Moral":"Ideological"
+};
+
+function canonicalizeType(type){
+  return typeAliasMap[type] || type;
+}
+
+function matchesUserTypes(leader, userTypes){
+  if(!leader.types || !leader.types.length) return true;
+  const userSet = new Set((userTypes || []).map(canonicalizeType));
+  return leader.types.some(t => userSet.has(canonicalizeType(t)));
+}
+
+const leaders = [
+{name:"Donald Trump",types:["Mobilizer", "Combative"],slug:"donald_trump",quadrant:"democratic_open",bio:"High emotional mobilization, high conflict, strong personal brand.",summary:"45th and 47th President of the US. Highly personalized political style, skilled in shaping supporter camps through media and emotional narrative.",vec:{power:8,logic:3,conflict:9,emotion:10,order:2,ideology:4,mobilization:10,force:5,development:3},weight:{power:1.1,logic:0.8,conflict:1.4,emotion:1.5,order:0.6,ideology:0.9,mobilization:1.5,force:0.9,development:0.9}},
+{name:"Joe Biden",types:["Technocrat", "Coordinator"],slug:"joe_biden",quadrant:"democratic_institutional",bio:"Institutional, alliance-based, stability-first.",summary:"46th President of the US. Operating long-term within the system, leaning heavily toward alliance coordination, procedural governance, and continuity of order.",vec:{power:6,logic:7,conflict:3,emotion:5,order:9,ideology:5,mobilization:4,force:4,development:7},weight:{power:0.9,logic:1.2,conflict:0.7,emotion:0.9,order:1.5,ideology:0.9,mobilization:0.8,force:0.8,development:1.4}},
+{name:"Winston Churchill",types:["Wartime", "Mobilizer"],slug:"winston_churchill",quadrant:"democratic_open",bio:"Wartime narrative, mobilization of will, crisis leadership.",summary:"British wartime Prime Minister. Famous for speeches and mass mobilization, representing toughness and inspiration during crisis situations.",vec:{power:7,logic:6,conflict:9,emotion:8,order:5,ideology:5,mobilization:8,force:9,development:4},weight:{power:1.1,logic:1.0,conflict:1.5,emotion:1.2,order:0.9,ideology:0.9,mobilization:1.2,force:1.5,development:0.8}},
+{name:"Joseph Stalin",types:["Controller", "Strongman"],slug:"joseph_stalin",quadrant:"authoritarian_institutional",bio:"Extreme control, discipline, coercive machinery.",summary:"Soviet leader. Extreme centralization of power and organizational coercive force, representing highly controlled totalitarian rule.",vec:{power:10,logic:7,conflict:9,emotion:2,order:10,ideology:8,mobilization:4,force:10,development:4},weight:{power:1.6,logic:1.0,conflict:1.6,emotion:0.3,order:1.7,ideology:1.2,mobilization:0.6,force:1.8,development:1.1}},
+{name:"Vladimir Putin",types:["Strongman", "Statist"],slug:"vladimir_putin",quadrant:"authoritarian_institutional",bio:"Realism, centralized power, order and force.",summary:"President of Russia. Long emphasizing state capability, realism, security, and the centralization of executive power.",vec:{power:9,logic:8,conflict:7,emotion:3,order:7,ideology:4,mobilization:3,force:8,development:5},weight:{power:1.4,logic:1.2,conflict:1.1,emotion:0.6,order:1.2,ideology:0.8,mobilization:0.7,force:1.4,development:0.9}},
+{name:"Charles de Gaulle",types:["Strategic", "Statist"],slug:"charles_de_gaulle",quadrant:"authoritarian_institutional",bio:"National will, independence, strategic rationality.",summary:"French general and President. Emphasizing national independence and strategic autonomy, combining personal prestige with an institutional sense.",vec:{power:8,logic:8,conflict:6,emotion:5,order:7,ideology:5,mobilization:5,force:7,development:7},weight:{power:1.2,logic:1.3,conflict:0.8,emotion:0.8,order:1.1,ideology:0.9,mobilization:0.8,force:1.1,development:1.4}},
+{name:"Kim Jong Un",types:["Strongman", "Ideological"],slug:"kim_jong_un",quadrant:"authoritarian_institutional",bio:"Highly personalized power and military deterrence.",summary:"Leader of North Korea. Represents extreme power centralization, symbolic politics, and high-intensity security logic.",vec:{power:10,logic:4,conflict:8,emotion:3,order:8,ideology:8,mobilization:6,force:10,development:2},weight:{power:1.7,logic:0.7,conflict:1.3,emotion:0.5,order:1.2,ideology:1.4,mobilization:1.0,force:1.8,development:1.3}},
+{name:"Shinzo Abe",types:["Technocrat", "Developmental"],slug:"shinzo_abe",quadrant:"democratic_institutional",bio:"Institutional conservatism, strategic revision, long-term planning.",summary:"Former Prime Minister of Japan. Represents a mix of institutional conservatism and strategic revision, with a style geared towards long-term layout.",vec:{power:6,logic:7,conflict:4,emotion:4,order:8,ideology:7,mobilization:4,force:5,development:7},weight:{power:0.9,logic:1.2,conflict:0.8,emotion:0.7,order:1.4,ideology:1.2,mobilization:0.8,force:1.0,development:1.4}},
+{name:"John F. Kennedy",types:["Charismatic", "Mobilizer"],slug:"john_f_kennedy",quadrant:"democratic_open",bio:"Charismatic vision, public communication, youthfulness.",summary:"35th US President. Strong public image, adept at using vision, style, and symbolism to shape leadership.",vec:{power:6,logic:5,conflict:4,emotion:9,order:4,ideology:5,mobilization:9,force:4,development:6},weight:{power:0.8,logic:0.8,conflict:0.7,emotion:1.6,order:0.7,ideology:0.8,mobilization:1.5,force:0.7,development:1.0}},
+{name:"Franklin D. Roosevelt",types:["Developmental", "Mobilizer"],slug:"franklin_d_roosevelt",quadrant:"democratic_open",bio:"Crisis governance, public reassurance, national mobilization.",summary:"32nd US President. Maintained support during the Great Depression and war through strong national mobilization and narrative.",vec:{power:7,logic:7,conflict:4,emotion:8,order:7,ideology:5,mobilization:8,force:5,development:10},weight:{power:0.7,logic:0.9,conflict:0.5,emotion:1.2,order:0.9,ideology:0.6,mobilization:1.3,force:0.5,development:1.6}},
+{name:"Benito Mussolini",types:["Mobilizer", "Combative"],slug:"benito_mussolini",quadrant:"authoritarian_open",bio:"Mass mobilization, dramatized power display, strong confrontation.",summary:"Italian fascist leader. Represents strong symbolism, personal performance, and high-conflict politics.",vec:{power:9,logic:3,conflict:9,emotion:8,order:4,ideology:9,mobilization:10,force:7,development:2},weight:{power:1.2,logic:0.6,conflict:1.4,emotion:1.2,order:0.7,ideology:1.4,mobilization:1.4,force:1.0,development:1.2}},
+{name:"Chun Doo-hwan",types:["Controller", "Strongman"],slug:"chun_doo_hwan",quadrant:"authoritarian_institutional",bio:"Military coercion, order-first, low tolerance for error.",summary:"Former President of South Korea. Represents rule maintained through order, military power, and high-pressure governance.",vec:{power:9,logic:5,conflict:8,emotion:1,order:9,ideology:4,mobilization:1,force:10,development:3},weight:{power:1.2,logic:0.8,conflict:1.2,emotion:0.3,order:1.3,ideology:0.7,mobilization:0.3,force:1.5,development:1.1}},
+{name:"Adolf Hitler",types:["Ideological", "Mobilizer"],slug:"adolf_hitler",quadrant:"authoritarian_open",bio:"Extreme ideology, friend-enemy dichotomy, fanatical mobilization.",summary:"Leader of Nazi Germany. Known for extreme ideology, dividing enemies, and massive mass mobilization.",vec:{power:10,logic:3,conflict:10,emotion:9,order:7,ideology:10,mobilization:10,force:9,development:2},weight:{power:1.5,logic:0.5,conflict:1.6,emotion:1.2,order:0.9,ideology:1.8,mobilization:1.8,force:1.3,development:1.2}},
+{name:"Nawaf Salam",types:["Technocrat", "Institutional"],slug:"nawaf_salam",quadrant:"democratic_institutional",bio:"Legal, procedural, technocratic tendencies.",summary:"Used here as an archetype of a technocrat, leaning heavily into law, procedure, and institutional coordination.",vec:{power:4,logic:8,conflict:2,emotion:3,order:9,ideology:4,mobilization:2,force:2,development:8},weight:{power:0.6,logic:1.5,conflict:0.5,emotion:0.5,order:1.5,ideology:0.7,mobilization:0.5,force:0.5,development:1.7}},
+{name:"David Cameron",types:["Technocrat", "Coordinator"],slug:"david_cameron",quadrant:"democratic_institutional",bio:"Moderate conservative, intra-institutional coordination, centrist.",summary:"Former UK Prime Minister. Represents center-right, institutional compromise, and a managerial style.",vec:{power:4,logic:7,conflict:2,emotion:4,order:8,ideology:4,mobilization:3,force:3,development:6},weight:{power:0.5,logic:1.2,conflict:0.5,emotion:0.7,order:1.5,ideology:0.7,mobilization:0.6,force:0.6,development:1.0}},
+{name:"Emmanuel Macron",types:["Technocrat", "Reformist"],slug:"emmanuel_macron",quadrant:"democratic_institutional",bio:"Technocratic, reform narrative, elitist.",summary:"President of France. Leaning towards reform and technocratic governance, while emphasizing personal narrative and political stagecraft.",vec:{power:6,logic:9,conflict:4,emotion:5,order:7,ideology:5,mobilization:5,force:3,development:9},weight:{power:0.8,logic:1.6,conflict:0.8,emotion:0.9,order:1.1,ideology:0.9,mobilization:0.9,force:0.5,development:1.9}},
+{name:"Nikita Khrushchev",types:["Mobilizer", "Impulsive"],slug:"nikita_khrushchev",quadrant:"authoritarian_open",bio:"Radical revision, rugged, impulsive expression.",summary:"Soviet leader. Style was more unstable, volatile, and improvisational compared to Stalin's rigid structure.",vec:{power:7,logic:4,conflict:8,emotion:7,order:5,ideology:7,mobilization:7,force:7,development:4},weight:{power:1.0,logic:0.6,conflict:1.3,emotion:1.2,order:0.8,ideology:1.1,mobilization:1.2,force:1.1,development:0.8}},
+{name:"Mahatma Gandhi",types:["Moral", "Mobilizer"],slug:"mahatma_gandhi",quadrant:"democratic_institutional",bio:"Non-violence, moral appeal, idealism.",summary:"Leader of the Indian independence movement. Represents low coercion, strong moral legitimacy, and high idealism.",vec:{power:2,logic:6,conflict:1,emotion:8,order:7,ideology:10,mobilization:9,force:1,development:4},weight:{power:0.4,logic:0.9,conflict:0.2,emotion:1.4,order:1.0,ideology:1.8,mobilization:1.4,force:0.1,development:0.7}},
+{name:"Ho Chi Minh",types:["Ideological", "Mobilizer"],slug:"ho_chi_minh",quadrant:"authoritarian_open",bio:"Revolutionary mobilization, ideal narrative, long-term struggle.",summary:"Vietnamese revolutionary leader. Combining narratives of national independence with revolutionary organization and mass mobilization.",vec:{power:6,logic:6,conflict:6,emotion:7,order:5,ideology:9,mobilization:10,force:6,development:4},weight:{power:0.7,logic:0.7,conflict:0.9,emotion:1.0,order:0.8,ideology:1.6,mobilization:1.5,force:0.9,development:0.9}},
+{name:"Angela Merkel",types:["Technocrat", "Institutional"],slug:"angela_merkel",quadrant:"democratic_institutional",bio:"Technocratic governance, calm control, low personal performance.",summary:"Former Chancellor of Germany. Known for pragmatism, stability, and crisis management, a typical prudent technocratic leader.",vec:{power:5,logic:9,conflict:2,emotion:3,order:9,ideology:4,mobilization:2,force:2,development:8},weight:{power:0.8,logic:1.5,conflict:0.5,emotion:0.6,order:1.6,ideology:0.8,mobilization:0.5,force:0.4,development:1.5}},
+{name:"Barack Obama",types:["Charismatic", "Mobilizer"],slug:"barack_obama",quadrant:"democratic_open",bio:"High narrative, high communication, low conflict.",summary:"44th US President. Strong at public communication and vision articulation, leaning towards narrative mobilization and coalition building.",vec:{power:6,logic:6,conflict:3,emotion:9,order:5,ideology:6,mobilization:9,force:3,development:7},weight:{power:0.9,logic:0.9,conflict:0.6,emotion:1.5,order:0.8,ideology:1.0,mobilization:1.5,force:0.5,development:1.1}},
+{name:"Bill Clinton",types:["Coordinator", "Realist"],slug:"bill_clinton",quadrant:"democratic_open",bio:"Pragmatic communicator, highly politically adaptable.",summary:"42nd US President. Skilled in public communication, realist governance, and political coordination.",vec:{power:6,logic:7,conflict:4,emotion:7,order:6,ideology:5,mobilization:7,force:3,development:7},weight:{power:0.9,logic:1.1,conflict:0.7,emotion:1.2,order:1.0,ideology:0.8,mobilization:1.2,force:0.5,development:1.2}},
+{name:"Lee Kuan Yew",types:["Developmental", "Technocrat"],slug:"lee_kuan_yew",quadrant:"authoritarian_institutional",bio:"State-led development, high institutional discipline, pragmatic governance.",summary:"Founding Prime Minister of Singapore. Known for long-term planning, institutional discipline, and a results-focused developmental state approach.",vec:{power:8,logic:9,conflict:3,emotion:2,order:10,ideology:4,mobilization:2,force:6,development:10},weight:{power:1.2,logic:1.5,conflict:0.6,emotion:0.4,order:1.7,ideology:0.7,mobilization:0.5,force:1.0,development:1.9}},
+{name:"Park Chung Hee",types:["Developmental", "Strongman"],slug:"park_chung_hee",quadrant:"authoritarian_institutional",bio:"Developmental authoritarianism, industry-first.",summary:"Former President of South Korea. Known for high order, high coercion, and rapid industrialization, a developmental authoritarian archetype.",vec:{power:8,logic:7,conflict:5,emotion:2,order:9,ideology:4,mobilization:3,force:8,development:9},weight:{power:1.2,logic:1.1,conflict:0.8,emotion:0.4,order:1.5,ideology:0.7,mobilization:0.6,force:1.4,development:1.7}},
+{name:"Fidel Castro",types:["Ideological", "Mobilizer"],slug:"fidel_castro",quadrant:"authoritarian_open",bio:"Revolutionary mobilization, long-term mass leadership.",summary:"Cuban revolutionary leader. Known for revolutionary narrative, long-term personal leadership, and mass mobilization.",vec:{power:7,logic:5,conflict:6,emotion:8,order:5,ideology:9,mobilization:10,force:6,development:4},weight:{power:1.0,logic:0.7,conflict:0.9,emotion:1.2,order:0.8,ideology:1.6,mobilization:1.6,force:0.9,development:0.8}},
+{name:"Juan Perón",types:["Mobilizer", "Populist"],slug:"juan_peron",quadrant:"authoritarian_open",bio:"Populist mobilization, mass line.",summary:"Former President of Argentina. Often seen as a classic representative of populist politics and mass mobilization.",vec:{power:7,logic:4,conflict:7,emotion:8,order:5,ideology:7,mobilization:9,force:6,development:5},weight:{power:1.0,logic:0.6,conflict:1.1,emotion:1.3,order:0.8,ideology:1.1,mobilization:1.5,force:0.9,development:0.9}},
+{name:"Mao Zedong",types:["Ideological", "Mobilizer"],slug:"mao_zedong",quadrant:"authoritarian_open",bio:"Continuous revolution, mass mobilization, high ideology.",summary:"Founding leader of the PRC. Characterized by intense ideological campaigns, mass mobilization, and a preference for continuous revolution over institutionalized bureaucracy.",vec:{power:9,logic:3,conflict:10,emotion:9,order:2,ideology:10,mobilization:10,force:8,development:4},weight:{power:1.4,logic:0.8,conflict:1.6,emotion:1.4,order:1.0,ideology:1.8,mobilization:1.8,force:1.2,development:0.8}},
+{name:"Xi Jinping",types:["Strongman", "Developmental"],slug:"xi_jinping",quadrant:"authoritarian_institutional",bio:"Centralized authority, institutional discipline, national rejuvenation.",summary:"Current paramount leader of China. Focuses heavily on party discipline, technological and industrial development, national security, and strong institutional centralization.",vec:{power:9,logic:7,conflict:6,emotion:3,order:9,ideology:8,mobilization:4,force:8,development:8},weight:{power:1.5,logic:1.0,conflict:0.9,emotion:0.5,order:1.6,ideology:1.3,mobilization:0.6,force:1.3,development:1.4}}
+];
+
+const quadrantQuestions = [
+  {
+    id:"quad_q1",
+    type:"single",
+    kicker:"Multiple Choice",
+    title:"When a team falls into chaos, you prefer to:",
+    desc:"Please choose the option that best matches your true inclination.",
+    options:[
+      {label:"Have one person quickly make a final decision to stabilize the situation", axis:{authoritarian:1}},
+      {label:"Quickly clarify rules and division of labor so everyone collaborates systematically", axis:{democratic:1}}
+    ]
+  },
+  {
+    id:"quad_q2",
+    type:"single",
+    kicker:"Multiple Choice",
+    title:"The most reliable way to push a major initiative is to:",
+    desc:"Please choose the option that best matches your true inclination.",
+    options:[
+      {label:"Have someone take the lead, mobilizing everyone's emotions and actions", axis:{open:1}},
+      {label:"Design processes, rules, and pacing well so the system runs itself", axis:{institutional:1}}
+    ]
+  },
+  {
+    id:"quad_q3",
+    type:"single",
+    kicker:"Multiple Choice",
+    title:"When the external environment suddenly becomes unstable, you are more likely to:",
+    desc:"Please select the option that best fits your initial reaction.",
+    options:[
+      {label:"Decisively centralize decision-making power to suppress the chaos", axis:{authoritarian:1, institutional:1}},
+      {label:"Adjust rules and resource allocation to restore system balance", axis:{democratic:1, institutional:1}},
+      {label:"Quickly unify messaging and emotions to get everyone moving in one direction", axis:{authoritarian:1, open:1}},
+      {label:"Minimize intervention, observe first, then decide", axis:{democratic:1, open:1}}
+    ]
+  }
+];
+
+const questions = [
+{id:"q1",type:"binary",kicker:"True/False",title:"In a crisis, which approach do you prefer?",desc:"Choose the option that matches your true instinct.",weight:1.4,options:[{label:"Quick decision, even if imperfect",score:{power:2,conflict:1}},{label:"Careful judgment, even if missing an opportunity",score:{logic:2,order:1}}]},
+{id:"q2",type:"binary",kicker:"True/False",title:"Your view on power is closer to:",desc:"Choose the option that matches your true instinct.",weight:1.4,options:[{label:"Power must be centralized",score:{power:2,order:1}},{label:"Power should be dispersed and constrained",score:{logic:1,order:2,power:-1}}]},
+{id:"q3",type:"binary",kicker:"True/False",title:"How do you view conflict?",desc:"Choose the option that matches your true instinct.",weight:1.4,options:[{label:"Conflict is a tool to advance situations",score:{conflict:2,power:1}},{label:"Stability is more important than conflict",score:{order:2,conflict:-1}}]},
+{id:"q4",type:"single",kicker:"Multiple Choice",title:"Facing public opposition, you are more likely to:",desc:"All four options represent different strategies.",weight:1.0,options:[{label:"Strongly suppress it",score:{power:2,conflict:2}},{label:"Try to persuade them",score:{emotion:2,mobilization:1}},{label:"Temporarily avoid it",score:{logic:1,conflict:-1}},{label:"Convert and utilize them to your advantage",score:{logic:2,power:1}}]},
+{id:"q5",type:"single",kicker:"Multiple Choice",title:"When a team is inefficient, you prefer to:",desc:"All four options represent different governance styles.",weight:1.0,options:[{label:"Forcefully reorganize",score:{power:2,order:1}},{label:"Optimize structure and processes",score:{logic:2,order:2}},{label:"Encourage communication",score:{emotion:2,mobilization:1}},{label:"Replace key personnel",score:{power:1,conflict:1}}]},
+{id:"q6",type:"multi",kicker:"Multiple Selection",title:"What do you think effective leadership includes?",desc:"Select up to 2. The first choice is primary, second is secondary.",mainWeight:1.0,secondWeight:0.5,max:2,options:[{label:"Strong push",score:{power:2,conflict:1}},{label:"Systematic management",score:{order:2,logic:1}},{label:"Mass mobilization",score:{emotion:2,mobilization:2}},{label:"Long-term planning",score:{logic:2,order:1}}]},
+{id:"q7",type:"multi",kicker:"Multiple Selection",title:"Which political outcomes do you value most?",desc:"Select up to 2.",mainWeight:1.0,secondWeight:0.5,max:2,options:[{label:"Stability",score:{order:2}},{label:"Development",score:{development:2,order:1}},{label:"Control",score:{power:2}},{label:"Influence",score:{emotion:1,mobilization:2}}]},
+{id:"q8",type:"likert",kicker:"Scenario",title:"\"I tend to want to control the situation.\"",desc:"Please select your level of agreement.",weight:1.2,dim:"power"},
+{id:"q9",type:"likert",kicker:"Scenario",title:"\"I am willing to take high risks in exchange for results.\"",desc:"Please select your level of agreement.",weight:1.2,scores:[{conflict:-2,logic:1},{conflict:-1},{},{conflict:1,power:1},{conflict:2,force:1}]},
+{id:"q10",type:"likert",kicker:"Scenario",title:"\"I rely more on mass support than purely on institutional operations.\"",desc:"Please select your level of agreement.",weight:1.2,scores:[{mobilization:-2,order:1},{mobilization:-1},{},{mobilization:1,emotion:1},{mobilization:2,emotion:2}]},
+{id:"q11",type:"likert",kicker:"Scenario",title:"\"Rules should be strictly enforced.\"",desc:"Please select your level of agreement.",weight:1.2,dim:"order"},
+{id:"q12",type:"policy",kicker:"Policy",title:"During social unrest, what means do you prioritize?",desc:"This question has high discriminative power.",weight:1.6,options:[{label:"Emphasize common beliefs and value systems",score:{ideology:2,mobilization:2,emotion:1}},{label:"Shift blame and clarify opposition targets",score:{conflict:2,power:1,mobilization:1}},{label:"Use tax cuts, welfare, or economic policies to ease pressure",score:{order:2,development:2}},{label:"Strengthen military/police and coercive force to maintain order",score:{force:2,power:2,order:1}}]},
+{id:"q13",type:"policy",kicker:"Policy",title:"When approval ratings drop, you tend to:",desc:"This question has high discriminative power.",weight:1.6,options:[{label:"Build vision and narrative to re-inspire the public",score:{emotion:2,mobilization:2,ideology:1}},{label:"Create stronger controversial issues to shift focus",score:{conflict:2,mobilization:1}},{label:"Introduce short-term economic measures",score:{order:2,development:2}},{label:"Show a tough stance and strong execution",score:{power:2,force:1,conflict:1}}]},
+{id:"q14",type:"policy",kicker:"Policy",title:"For a long-term national route, you are more willing to bet on:",desc:"This question has high discriminative power.",weight:1.6,options:[{label:"Culture and belief systems",score:{ideology:2,emotion:1,mobilization:1}},{label:"Power and control capabilities",score:{power:2,force:1}},{label:"Economic development and industrial base",score:{development:2,order:1}},{label:"Technological innovation and structural upgrades",score:{development:3,logic:1}}]},
+{id:"q15",type:"ranking",kicker:"Ranking",title:"What is the most important thing for a country?",desc:"Please sort by importance (top is most important). This is a core discriminant.",weight:2.0,items:["National Security","Economic Development","Tech Innovation","Industrial Base","Cultural Identity","Belief System"]}
+];
+
+const quadrantState = {};
+const state = {};
+let phase = "quadrant";
+let currentIndex = 0;
+let lockedQuadrant = null;
+
+function initState(){
+  quadrantQuestions.forEach(q=> quadrantState[q.id] = null);
+  questions.forEach(q=>{
+    if(q.type === 'multi') state[q.id] = [];
+    else if(q.type === 'ranking') state[q.id] = [...q.items];
+    else state[q.id] = null;
+  });
+  phase = "quadrant";
+  currentIndex = 0;
+  lockedQuadrant = null;
+}
+initState();
+
+function currentList(){
+  return phase === "quadrant" ? quadrantQuestions : questions;
+}
+
+function currentStore(){
+  return phase === "quadrant" ? quadrantState : state;
+}
+
+function currentQuestion(){
+  return currentList()[currentIndex];
+}
+
+function typeName(q){
+  const map = {binary:"True/False", single:"Multiple Choice", multi:"Multiple Selection", likert:"Scenario", policy:"Policy", ranking:"Ranking"};
+  return map[q.type] || "Question";
+}
+
+function quadrantLabel(q){
+  const map = {
+    democratic_open:"Democratic-Open",
+    democratic_institutional:"Democratic-Institutional",
+    authoritarian_open:"Authoritarian-Open",
+    authoritarian_institutional:"Authoritarian-Institutional"
+  };
+  return map[q] || q;
+}
+
+function determineQuadrant(){
+  const q1 = quadrantState["quad_q1"];
+  const q2 = quadrantState["quad_q2"];
+  const q3 = quadrantState["quad_q3"];
+
+  let axis1Votes = {democratic:0, authoritarian:0};
+  let axis2Votes = {open:0, institutional:0};
+
+  if(q1 !== null){
+    Object.entries(quadrantQuestions[0].options[q1].axis || {}).forEach(([k,v])=>{
+      if(k in axis1Votes) axis1Votes[k] += v;
+    });
+  }
+
+  if(q2 !== null){
+    Object.entries(quadrantQuestions[1].options[q2].axis || {}).forEach(([k,v])=>{
+      if(k in axis2Votes) axis2Votes[k] += v;
+    });
+  }
+
+  if(q3 !== null){
+    Object.entries(quadrantQuestions[2].options[q3].axis || {}).forEach(([k,v])=>{
+      if(k in axis1Votes) axis1Votes[k] += v;
+      if(k in axis2Votes) axis2Votes[k] += v;
+    });
+  }
+
+  const q1Fallback = q1 === 0 ? "authoritarian" : "democratic";
+  const q2Fallback = q2 === 0 ? "open" : "institutional";
+
+  const axis1 = axis1Votes.authoritarian === axis1Votes.democratic
+    ? q1Fallback
+    : (axis1Votes.authoritarian > axis1Votes.democratic ? "authoritarian" : "democratic");
+
+  const axis2 = axis2Votes.open === axis2Votes.institutional
+    ? q2Fallback
+    : (axis2Votes.open > axis2Votes.institutional ? "open" : "institutional");
+
+  return `${axis1}_${axis2}`;
+}
+
+function progressInfo(){
+  if(phase === "quadrant"){
+    return {
+      text:`Question ${currentIndex+1} / ${quadrantQuestions.length + questions.length}`,
+      typeText:`Type: ${typeName(currentQuestion())}`,
+      width:((currentIndex+1)/(quadrantQuestions.length + questions.length))*100
+    };
+  }
+  return {
+    text:`Question ${quadrantQuestions.length + currentIndex + 1} / ${quadrantQuestions.length + questions.length}`,
+    typeText:`Type: ${typeName(currentQuestion())}`,
+    width:((quadrantQuestions.length + currentIndex + 1)/(quadrantQuestions.length + questions.length))*100
+  };
+}
+
+function renderCurrentQuestion(){
+  const q = currentQuestion();
+  const info = progressInfo();
+  document.getElementById("progressText").textContent = info.text;
+  document.getElementById("typeText").textContent = info.typeText;
+  document.getElementById("progressBar").style.width = `${info.width}%`;
+
+  const card = document.getElementById("questionCard");
+  card.innerHTML = `
+    <div class="q-kicker">${q.kicker || typeName(q)}</div>
+    <h2 class="q-title">${q.title}</h2>
+    <p class="q-desc">${q.desc}</p>
+  `;
+
+  const store = currentStore();
+
+  if(["binary","single","policy"].includes(q.type)){
+    const wrap = document.createElement("div");
+    wrap.className = "options";
+    q.options.forEach((opt, oi)=>{
+      const btn = document.createElement("div");
+      btn.className = "option" + (store[q.id]===oi ? " selected" : "");
+      btn.textContent = opt.label;
+      btn.onclick = ()=>{
+        store[q.id]=oi;
+        renderCurrentQuestion();
+        autoAdvanceIfSimple(q);
+      };
+      wrap.appendChild(btn);
+    });
+    card.appendChild(wrap);
+  }
+
+  if(q.type === "multi"){
+    const wrap = document.createElement("div");
+    wrap.className = "options";
+    q.options.forEach((opt, oi)=>{
+      const selectedIdx = store[q.id].indexOf(oi);
+      let extra = "";
+      if(selectedIdx === 0) extra = " (Primary)";
+      if(selectedIdx === 1) extra = " (Secondary)";
+      const btn = document.createElement("div");
+      btn.className = "option" + (selectedIdx !== -1 ? " selected" : "");
+      btn.textContent = opt.label + extra;
+      btn.onclick = ()=>{
+        const arr = store[q.id];
+        const pos = arr.indexOf(oi);
+        if(pos !== -1) arr.splice(pos,1);
+        else if(arr.length < q.max) arr.push(oi);
+        renderCurrentQuestion();
+      };
+      wrap.appendChild(btn);
+    });
+    card.appendChild(wrap);
+    const tip = document.createElement("p");
+    tip.className = "hint";
+    tip.textContent = store[q.id].length >= q.max ? "Limit reached. You can deselect options to choose others." : `Currently selected: ${store[q.id].length} / ${q.max}`;
+    card.appendChild(tip);
+  }
+
+  if(q.type === "likert"){
+    const labels = ["Strongly Disagree","Disagree","Neutral","Agree","Strongly Agree"];
+    const wrap = document.createElement("div");
+    wrap.className = "likert-row";
+    labels.forEach((lab, li)=>{
+      const btn = document.createElement("div");
+      btn.className = "option" + (store[q.id]===li ? " selected" : "");
+      btn.textContent = lab;
+      btn.onclick = ()=>{
+        store[q.id]=li;
+        renderCurrentQuestion();
+        autoAdvanceIfSimple(q);
+      };
+      wrap.appendChild(btn);
+    });
+    card.appendChild(wrap);
+  }
+
+  if(q.type === "ranking"){
+    const list = document.createElement("div");
+    list.className = "rank-list";
+    store[q.id].forEach((item, i)=>{
+      const row = document.createElement("div");
+      row.className = "rank-item";
+      row.innerHTML = `<strong>${i+1}. ${item}</strong>`;
+      const actions = document.createElement("div");
+      actions.className = "rank-actions";
+      const up = document.createElement("button");
+      up.className = "secondary";
+      up.textContent = "Up";
+      up.disabled = i===0;
+      up.onclick = ()=>{
+        const arr = store[q.id];
+        [arr[i-1], arr[i]] = [arr[i], arr[i-1]];
+        renderCurrentQuestion();
+      };
+      const down = document.createElement("button");
+      down.className = "secondary";
+      down.textContent = "Down";
+      down.disabled = i===store[q.id].length-1;
+      down.onclick = ()=>{
+        const arr = store[q.id];
+        [arr[i+1], arr[i]] = [arr[i], arr[i+1]];
+        renderCurrentQuestion();
+      };
+      actions.appendChild(up);
+      actions.appendChild(down);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+    card.appendChild(list);
+    const tip = document.createElement("p");
+    tip.className = "hint";
+    tip.textContent = "Place the items you think are most important at the top.";
+    card.appendChild(tip);
+  }
+
+  document.getElementById("prevBtn").disabled = (phase === "quadrant" && currentIndex === 0);
+  if(phase === "quadrant"){
+    document.getElementById("nextBtn").textContent = "Next";
+  } else {
+    document.getElementById("nextBtn").textContent = currentIndex === questions.length-1 ? "Finish and View Results" : "Next";
+  }
+}
+
+function autoAdvanceIfSimple(q){
+  if(!["binary","single","policy","likert"].includes(q.type)) return;
+  setTimeout(()=>{
+    if(phase === "quadrant"){
+      if(currentIndex < quadrantQuestions.length-1){
+        currentIndex += 1;
+        renderCurrentQuestion();
+      }else{
+        lockedQuadrant = determineQuadrant();
+        phase = "main";
+        currentIndex = 0;
+        renderCurrentQuestion();
+      }
+    }else{
+      if(currentIndex < questions.length-1){
+        currentIndex += 1;
+        renderCurrentQuestion();
+      }
+    }
+    window.scrollTo({top:0, behavior:"smooth"});
+  }, 140);
+}
+
+function zeroVector(){
+  const v = {};
+  dims.forEach(d=>v[d]=0);
+  return v;
+}
+
+function addScore(target, scoreObj, weight=1){
+  Object.entries(scoreObj || {}).forEach(([k,v])=>{
+    target[k] += v * weight;
+  });
+}
+
+function normalizeUser(v){
+  const out = {};
+  dims.forEach(d=>{
+    const shifted = 5 + v[d] / 3.2;
+    out[d] = Math.max(0, Math.min(10, shifted));
+  });
+  return out;
+}
+
+function analyzeRanking(ans){
+  const top3 = ans.slice(0,3);
+  return {
+    primary: ans[0],
+    secondary: ans[1],
+    tertiary: ans[2],
+    top2: ans.slice(0,2),
+    top3,
+    securityFirst: ans[0] === "National Security",
+    developmentFirst: ans[0] === "Economic Development",
+    innovationFirst: ans[0] === "Tech Innovation",
+    industryFirst: ans[0] === "Industrial Base",
+    cultureFirst: ans[0] === "Cultural Identity",
+    faithFirst: ans[0] === "Belief System",
+    developmentHeavy: top3.includes("Economic Development") || top3.includes("Industrial Base") || top3.includes("Tech Innovation"),
+    cultureHeavy: top3.includes("Cultural Identity") || top3.includes("Belief System")
+  };
+}
+
+function buildUserVector(){
+  const user = zeroVector();
+  const meta = {topRanking: [], developmentBias: 0, securityBias: 0, rankingProfile: null};
+
+  questions.forEach(q=>{
+    const ans = state[q.id];
+
+    if(["binary","single","policy"].includes(q.type) && ans !== null){
+      addScore(user, q.options[ans].score, q.weight);
+      if(["q12","q13","q14"].includes(q.id)){
+        if((q.id === "q12" && ans === 2) || (q.id === "q13" && ans === 2) || (q.id === "q14" && (ans === 2 || ans === 3))){
+          meta.developmentBias += 2;
+        }
+        if((q.id === "q12" && ans === 3) || (q.id === "q14" && ans === 1)){
+          meta.securityBias += 2;
+        }
+      }
+    }
+
+    if(q.type === "multi"){
+      if(ans[0] !== undefined) addScore(user, q.options[ans[0]].score, q.mainWeight);
+      if(ans[1] !== undefined) addScore(user, q.options[ans[1]].score, q.secondWeight);
+    }
+
+    if(q.type === "likert" && ans !== null){
+      if(q.dim){
+        const scale = [-2,-1,0,1,2][ans];
+        const obj = {};
+        obj[q.dim] = scale;
+        addScore(user, obj, q.weight);
+      }else{
+        addScore(user, q.scores[ans], q.weight);
+      }
+    }
+
+    if(q.type === "ranking"){
+      meta.topRanking = ans.slice(0,2);
+      meta.rankingProfile = analyzeRanking(ans);
+      if(meta.topRanking.includes("Economic Development")) meta.developmentBias += 2;
+      if(meta.topRanking.includes("Tech Innovation")) meta.developmentBias += 3;
+      if(meta.topRanking.includes("Industrial Base")) meta.developmentBias += 2;
+      if(meta.topRanking.includes("National Security")) meta.securityBias += 2;
+    }
+  });
+
+  return { user: normalizeUser(user), meta };
+}
+
+function distinctiveness(v){
+  return dims.reduce((acc,k)=>acc + Math.abs(v[k]-5), 0);
+}
+
+function weightedDistance(user, leader){
+  let sum = 0;
+  dims.forEach(k=>{
+    const w = leader.weight[k] || 1;
+    sum += w * Math.pow(user[k] - leader.vec[k], 2);
+  });
+  return Math.sqrt(sum);
+}
+
+function centerPenalty(leader){
+  const dist = distinctiveness(leader.vec);
+  return dist < 14 ? (14 - dist) * 0.25 : 0;
+}
+
+function extremenessPenalty(leader){
+  let penalty = 0;
+  if(leader.vec.power >= 9 && leader.vec.force >= 9) penalty += 0;
+  if(leader.vec.order >= 9 && leader.vec.emotion <= 2) penalty += 0;
+  if(leader.vec.conflict >= 9 && leader.vec.mobilization <= 3) penalty += 0;
+  return penalty;
+}
+
+function balanceAdjustment(leader){
+  const map = {
+    "Donald Trump":-6.0,
+    "Joe Biden":-4.0,
+    "Winston Churchill":-0.8,
+    "Joseph Stalin":-2.2,
+    "Vladimir Putin":2.8,
+    "Charles de Gaulle":5.0,
+    "Kim Jong Un":-1.5,
+    "Shinzo Abe":3.0,
+    "John F. Kennedy":0.2,
+    "Franklin D. Roosevelt":-0.4,
+    "Benito Mussolini":-3.0,
+    "Chun Doo-hwan":-2.0,
+    "Adolf Hitler":-6.5,
+    "Nawaf Salam":3.0,
+    "David Cameron":3.7,
+    "Emmanuel Macron":-5.0,
+    "Nikita Khrushchev":3.6,
+    "Mahatma Gandhi":-0.5,
+    "Ho Chi Minh":1.8,
+    "Angela Merkel":-1.0,
+    "Barack Obama":-0.5,
+    "Bill Clinton":0.8,
+    "Park Chung Hee":1.2,
+    "Fidel Castro":-0.2,
+    "Juan Perón":6.0,
+    "Mao Zedong":-2.0,
+    "Xi Jinping":1.0
+  };
+  return map[leader.name] || 0;
+}
+
+
+
+function profileAdjustment(user, leader){
+  const n = leader.name;
+
+  if(n === "Donald Trump"){
+    if(user.conflict >= 7.5 && user.emotion >= 7.5 && user.logic <= 5.5 && user.order <= 5.5) return -1.2;
+    if(user.conflict >= 6.8 && user.emotion >= 6.8) return -0.5;
+  }
+  if(n === "Winston Churchill"){
+    if(user.conflict >= 7.2 && user.force >= 6.6 && user.mobilization >= 6.0 && user.development <= 6.2) return -1.0;
+    if(user.conflict >= 6.6 && user.force >= 6.0) return -0.4;
+  }
+  if(n === "John F. Kennedy"){
+    if(user.emotion >= 7.2 && user.mobilization >= 7.0 && user.conflict <= 6.8 && user.force <= 5.8) return -1.1;
+    if(user.emotion >= 6.8 && user.mobilization >= 6.4 && user.conflict <= 7.2) return -0.5;
+  }
+  if(n === "Franklin D. Roosevelt"){
+    if(user.development >= 7.2 && user.order >= 6.0 && (user.emotion >= 6.0 || user.mobilization >= 6.0) && user.conflict <= 6.4) return -1.4;
+    if(user.development >= 6.8 && user.order >= 5.8) return -0.6;
+  }
+
+  if(n === "Joe Biden"){
+    if(user.order >= 6.5 && user.logic >= 5.8 && user.conflict <= 5.0 && user.ideology <= 6.5) return -1.2;
+    if(user.order >= 6.0 && user.logic >= 5.4 && user.conflict <= 5.6) return -0.5;
+  }
+  if(n === "Shinzo Abe"){
+    if(user.ideology >= 6.2 && user.development >= 6.4 && user.order >= 6.5 && user.force <= 6.0) return -0.9;
+  }
+  if(n === "Nawaf Salam"){
+    if(user.logic >= 7.2 && user.order >= 7.2 && user.force <= 4.8 && user.development >= 6.8) return -1.3;
+    if(user.logic >= 6.8 && user.order >= 6.8 && user.force <= 5.2) return -0.5;
+  }
+  if(n === "David Cameron"){
+    if(user.order >= 5.5 && user.order <= 7.5 && user.logic >= 5.8 && user.conflict <= 4.8 && user.development >= 5.0 && user.development <= 7.0) return -0.15;
+    if(user.order >= 5.2 && user.logic >= 5.5 && user.conflict <= 5.2) return -0.15;
+  }
+  if(n === "Emmanuel Macron"){
+    if(user.logic >= 7.8 && user.development >= 8.0 && user.order >= 6.8 && user.emotion >= 4.0 && user.emotion <= 6.3) return -1.0;
+    if(user.logic >= 7.2 && user.development >= 7.6) return -0.3;
+  }
+  if(n === "Mahatma Gandhi"){
+    if(user.conflict <= 4.5 && user.force <= 3.8 && user.ideology >= 7.0 && user.emotion >= 6.0) return -1.3;
+    if(user.conflict <= 5.0 && user.force <= 4.2 && user.ideology >= 6.5) return -0.5;
+  }
+
+  if(n === "Adolf Hitler"){
+    if(user.ideology >= 7.0 && user.mobilization >= 7.0 && user.conflict >= 7.2 && user.force >= 7.0) return -1.6;
+  }
+  if(n === "Benito Mussolini"){
+    if(user.emotion >= 7.0 && user.mobilization >= 7.0 && user.conflict >= 7.0 && user.ideology >= 6.8 && user.logic <= 5.8 && user.force >= 5.0 && user.force <= 8.0) return -1.4;
+    if(user.emotion >= 6.4 && user.mobilization >= 6.4 && user.conflict >= 6.4 && user.logic <= 6.4) return -0.6;
+  }
+  if(n === "Nikita Khrushchev"){
+    if(user.conflict >= 6.8 && user.emotion >= 6.2 && user.mobilization >= 5.8 && user.ideology >= 5.8 && user.ideology <= 7.6 && user.logic <= 6.0 && user.force <= 7.8) return -0.8;
+  }
+  if(n === "Ho Chi Minh"){
+    if(user.ideology >= 7.0 && user.mobilization >= 7.0 && user.emotion >= 5.8 && user.development <= 5.8 && user.force <= 7.0 && user.conflict >= 5.0 && user.conflict <= 7.5) return -0.6;
+    if(user.ideology >= 6.4 && user.mobilization >= 6.4 && user.emotion >= 5.2) return -0.2;
+  }
+
+  if(n === "Angela Merkel"){
+    if(user.logic >= 7.4 && user.order >= 7.4 && user.development >= 6.8 && user.conflict <= 5.2 && user.force <= 5.2) return -1.1;
+    if(user.logic >= 6.8 && user.order >= 6.8 && user.development >= 6.2) return -0.5;
+  }
+  if(n === "Barack Obama"){
+    if(user.emotion >= 7.4 && user.mobilization >= 7.4 && user.conflict <= 6.2 && user.force <= 5.6) return -1.0;
+    if(user.emotion >= 6.8 && user.mobilization >= 6.8 && user.conflict <= 6.8) return -0.4;
+  }
+  if(n === "Bill Clinton"){
+    if(user.logic >= 6.0 && user.emotion >= 6.0 && user.mobilization >= 5.8 && user.development >= 5.8 && user.conflict >= 3.0 && user.conflict <= 6.2) return -0.9;
+    if(user.logic >= 5.8 && user.emotion >= 5.8 && user.mobilization >= 5.6) return -0.4;
+  }
+  if(n === "Park Chung Hee"){
+    if(user.development >= 7.4 && user.order >= 7.2 && user.force >= 6.4 && user.power >= 6.4 && user.emotion <= 4.8 && user.mobilization <= 5.2) return -1.0;
+    if(user.development >= 6.8 && user.order >= 6.8 && user.force >= 6.0) return -0.5;
+  }
+  if(n === "Fidel Castro"){
+    if(user.ideology >= 7.2 && user.mobilization >= 7.6 && user.emotion >= 6.4 && user.force <= 7.4 && user.conflict >= 4.8 && user.conflict <= 7.6) return -1.0;
+    if(user.ideology >= 6.8 && user.mobilization >= 7.0 && user.emotion >= 5.8) return -0.4;
+  }
+  if(n === "Juan Perón"){
+    if(user.emotion >= 7.5 && user.mobilization >= 7.5 && user.conflict >= 5.5 && user.logic <= 5.8 && user.power >= 5.5 && user.power <= 8.0) return -0.15;
+    if(user.emotion >= 7.0 && user.mobilization >= 7.0 && user.conflict >= 5.0) return -0.05;
+  }
+
+  if(n === "Joseph Stalin"){
+    if(user.power >= 8.0 && user.order >= 8.0 && user.force >= 8.0 && user.conflict >= 7.0 && user.emotion <= 4.0) return -1.4;
+    if(user.power >= 7.4 && user.order >= 7.4 && user.force >= 7.4) return -0.6;
+  }
+  if(n === "Vladimir Putin"){
+    if(user.power >= 7.4 && user.logic >= 7.2 && user.force >= 6.6 && user.development >= 4.5 && user.development <= 6.2 && user.ideology <= 5.8) return -1.0;
+    if(user.power >= 6.8 && user.logic >= 6.8 && user.force >= 6.0) return -0.4;
+  }
+  if(n === "Charles de Gaulle"){
+    if(user.logic >= 8.2 && user.development >= 7.2 && user.power >= 6.8 && user.force >= 5.5 && user.force <= 7.8 && user.conflict <= 6.8) return -0.1;
+  }
+  if(n === "Kim Jong Un"){
+    if(user.power >= 8.5 && user.force >= 8.5 && user.ideology >= 7.0 && user.development <= 4.5 && user.mobilization <= 7.0) return -1.0;
+  }
+  if(n === "Chun Doo-hwan"){
+    if(user.order >= 8.0 && user.force >= 8.5 && user.power >= 7.5 && user.emotion <= 3.5 && user.mobilization <= 3.5 && user.development <= 4.5) return -1.5;
+    if(user.order >= 7.4 && user.force >= 7.8 && user.power >= 7.0 && user.emotion <= 4.2) return -0.6;
+  }
+
+  if(n === "Mao Zedong"){
+    if(user.ideology >= 7.5 && user.mobilization >= 7.5 && user.conflict >= 7.0 && user.order <= 4.0) return -1.5;
+    if(user.ideology >= 6.8 && user.mobilization >= 6.8 && user.conflict >= 6.0) return -0.6;
+  }
+
+  if(n === "Xi Jinping"){
+    if(user.power >= 7.5 && user.order >= 7.5 && user.development >= 7.0 && user.emotion <= 5.0) return -1.2;
+    if(user.power >= 6.8 && user.order >= 6.8 && user.development >= 6.5) return -0.5;
+  }
+
+  return 0;
+}
+
+
+function mustPenalty(user, meta, leader){
+  return satisfiesMust(user, meta, leader) ? 0 : 1.35;
+}
+
+const balancedLeaders = new Set(["Charles de Gaulle","Nikita Khrushchev","Bill Clinton","Shinzo Abe","Joe Biden","Emmanuel Macron"]);
+
+function vectorSpreadFromObj(obj){
+  const vals = Object.values(obj || {});
+  if(!vals.length) return 0;
+  const mean = vals.reduce((a,b)=>a+b,0) / vals.length;
+  const variance = vals.reduce((s,v)=>s + Math.pow(v-mean,2), 0) / vals.length;
+  return Math.sqrt(variance);
+}
+
+function isBalancedUser(user){
+  return vectorSpreadFromObj(user) <= 0.1;
+}
+
+function passesBalanceLock(user, leader){
+  if(!balancedLeaders.has(leader.name)) return true;
+  return isBalancedUser(user);
+}
+
+function getUnlockDims(leader){
+  const explicit = {
+    "Charles de Gaulle":["power","logic"],
+    "Nikita Khrushchev":["conflict","emotion","mobilization"],
+    "Vladimir Putin":["power","logic","force"],
+    "Joseph Stalin":["power","order","force"],
+    "Kim Jong Un":["power","force","ideology"],
+    "Chun Doo-hwan":["order","force","power"],
+    "Adolf Hitler":["ideology","mobilization","conflict"],
+    "Benito Mussolini":["conflict","emotion","mobilization"],
+    "Ho Chi Minh":["ideology","mobilization","emotion"],
+    "Angela Merkel":["logic","order"],
+    "Emmanuel Macron":["logic","development"],
+    "Shinzo Abe":["order","ideology","development"],
+    "Joe Biden":["order","logic"],
+    "John F. Kennedy":["emotion","mobilization"],
+    "Barack Obama":["emotion","mobilization"],
+    "Bill Clinton":["logic","emotion","mobilization"],
+    "Winston Churchill":["conflict","force","emotion"],
+    "Franklin D. Roosevelt":["development","emotion","mobilization"],
+    "Mahatma Gandhi":["ideology","mobilization","emotion"],
+    "Nawaf Salam":["logic","order","development"],
+    "David Cameron":["order","logic"],
+    "Park Chung Hee":["development","order","force"],
+    "Fidel Castro":["ideology","mobilization","emotion"],
+    "Juan Perón":["emotion","mobilization","conflict"],
+    "Donald Trump":["emotion","mobilization","conflict"],
+    "Mao Zedong":["ideology","mobilization","conflict"],
+    "Xi Jinping":["power","order","development"]
+  };
+  if(explicit[leader.name]) return explicit[leader.name];
+  const high = dims.filter(d => (leader.vec[d] || 0) >= 8);
+  return high.slice(0, 3);
+}
+
+function passesUnlock(user, leader, tolerance){
+  const unlockDims = getUnlockDims(leader);
+  if(!unlockDims || unlockDims.length === 0) return true;
+  return unlockDims.every(dim => {
+    const target = leader.vec[dim] || 0;
+    if(target < 8) return true;
+    return user[dim] >= target - tolerance;
+  });
+}
+
+function applyUnlockWindow(user, candidates){
+  if(!candidates || candidates.length <= 2) return {candidates, tolerance:null};
+  const tolerances = [0, 0.5, 1, 1.5, 2];
+  for(const tolerance of tolerances){
+    const unlocked = candidates.filter(x => passesUnlock(user, x.leader, tolerance));
+    if(unlocked.length >= 2) return {candidates: unlocked, tolerance};
+  }
+  return {candidates, tolerance:2};
+}
+
+function applyLocalRankingTiebreak(results, meta){
+  const r = meta.rankingProfile;
+  if(!r || !results || results.length < 2) return results;
+
+  const working = results.slice(0, 6).map(x => ({...x, localAdj:0}));
+  const names = new Set(working.map(x => x.leader.name));
+  const topGap = working[1].score - working[0].score;
+  if(topGap > 2.2) return results;
+
+  function hasAtLeast(arr, n){
+    let c = 0;
+    for(const name of arr){ if(names.has(name)) c += 1; }
+    return c >= n;
+  }
+  function bump(arr, delta){
+    working.forEach(x => { if(arr.includes(x.leader.name)) x.localAdj += delta; });
+  }
+
+  const authInst = ["Vladimir Putin","Joseph Stalin","Kim Jong Un","Park Chung Hee","Chun Doo-hwan","Charles de Gaulle","Xi Jinping"];
+  if(hasAtLeast(authInst, 2)){
+    if(r.securityFirst) bump(["Vladimir Putin","Chun Doo-hwan"], -1.0);
+    if(r.developmentFirst || r.industryFirst) bump(["Joseph Stalin","Park Chung Hee","Xi Jinping"], -1.0);
+    if(r.cultureFirst || r.faithFirst) bump(["Kim Jong Un"], -1.0);
+    if(r.innovationFirst) bump(["Park Chung Hee","Charles de Gaulle","Xi Jinping"], -0.6);
+    if(r.developmentFirst && r.logic < 7.5){
+      bump(["Charles de Gaulle"], +0.6);
+    }
+  }
+
+  const demOpen = ["John F. Kennedy","Barack Obama","Bill Clinton","Franklin D. Roosevelt"];
+  if(hasAtLeast(demOpen, 2)){
+    if(r.innovationFirst) bump(["Barack Obama","Bill Clinton"], -0.6);
+    if(r.developmentFirst || r.industryFirst) bump(["Franklin D. Roosevelt","Bill Clinton"], -0.7);
+    if(r.cultureFirst || r.faithFirst) bump(["John F. Kennedy","Barack Obama"], -0.5);
+    if(r.securityFirst) bump(["Franklin D. Roosevelt"], -0.4);
+  }
+
+  const demInst = ["Joe Biden","Shinzo Abe","Emmanuel Macron","Angela Merkel","David Cameron","Nawaf Salam"];
+  if(hasAtLeast(demInst, 2)){
+    if(r.securityFirst) bump(["Shinzo Abe","Joe Biden"], -0.7);
+    if(r.innovationFirst) bump(["Emmanuel Macron","Angela Merkel"], -0.8);
+    if(r.developmentFirst || r.industryFirst) bump(["Shinzo Abe","Emmanuel Macron"], -0.5);
+    if(r.cultureFirst || r.faithFirst) bump(["Nawaf Salam","David Cameron"], -0.3);
+  }
+
+  const authOpen = ["Adolf Hitler","Benito Mussolini","Ho Chi Minh","Fidel Castro","Juan Perón","Nikita Khrushchev","Mao Zedong"];
+  if(hasAtLeast(authOpen, 2)){
+    if(r.cultureFirst || r.faithFirst) bump(["Ho Chi Minh","Mao Zedong"], -0.5);
+    if(r.securityFirst) bump(["Adolf Hitler","Nikita Khrushchev"], -0.5);
+
+    if(
+      r.top2 &&
+      r.top2.includes("Cultural Identity") &&
+      r.top2.includes("Belief System")
+    ){
+      bump(["Adolf Hitler"], -6.0);
+      bump(["Benito Mussolini"], +1.5);
+    }
+
+    if(
+      r.securityFirst &&
+      r.top2 &&
+      r.top2.includes("Cultural Identity") &&
+      r.top2.includes("Belief System")
+    ){
+      bump(["Adolf Hitler"], -2.0);
+      bump(["Benito Mussolini"], +1.5);
+    }
+  }
+
+  const adjusted = results.map(x => ({...x, score:x.score}));
+  adjusted.forEach(x => {
+    const found = working.find(w => w.leader.name === x.leader.name);
+    if(found) x.score += found.localAdj;
+  });
+  adjusted.sort((a,b)=>a.score-b.score);
+  return adjusted;
+}
+
+function violatesVeto(user, meta, leader){
+  const n = leader.name;
+  if(meta.developmentBias >= 5 && ["Kim Jong Un","Adolf Hitler","Benito Mussolini","Mao Zedong"].includes(n)) return true;
+  if(meta.developmentBias >= 6 && n === "Vladimir Putin") return true;
+  if(user.force <= 3.8 && user.conflict <= 4.2 && ["Kim Jong Un","Joseph Stalin","Chun Doo-hwan","Adolf Hitler"].includes(n)) return true;
+  if(n === "Joseph Stalin" && (meta.developmentBias >= 8 || user.development >= 8.8)) return true;
+  if(n === "Joseph Stalin" && user.emotion >= 8.6 && user.mobilization >= 8.6 && user.conflict <= 5.0) return true;
+  if(n === "Franklin D. Roosevelt" && (user.development <= 6.8 || user.force >= 7.2 || user.power >= 8.5 || user.ideology >= 7.8 && user.conflict >= 6.8)) return true;
+  if(n === "Mahatma Gandhi" && (user.conflict >= 7.2 || user.force >= 6.2 || user.power >= 8.0)) return true;
+  if(["David Cameron","Nawaf Salam"].includes(n) && (user.conflict >= 8.6 || user.force >= 8.0)) return true;
+  if(n === "John F. Kennedy" && user.logic >= 8.0 && user.order >= 7.5 && user.mobilization <= 4.5) return true;
+  if(n === "Donald Trump" && user.logic >= 7.0 && user.order >= 6.8 && user.conflict <= 4.8 && user.emotion <= 6.4) return true;
+  if(n === "Emmanuel Macron" && (user.logic <= 5.6 || user.mobilization >= 7.2) && (user.force >= 6.6 || user.ideology >= 7.6)) return true;
+  if(n === "Vladimir Putin" && (user.development >= 6.8 || (user.emotion >= 6.8 && user.mobilization >= 6.8))) return true;
+  if(n === "Chun Doo-hwan" && (user.force <= 4.8 || user.order <= 4.8 || user.emotion >= 7.4 || user.mobilization >= 7.2 || user.development >= 8.4)) return true;
+  if(n === "Benito Mussolini" && (user.mobilization <= 4.3 || user.ideology <= 4.8 || user.conflict <= 4.8 || user.logic >= 8.6 || user.development >= 7.8)) return true;
+  if(n === "Ho Chi Minh" && (user.ideology <= 4.8 || user.mobilization <= 4.8 || user.emotion <= 3.7 || user.development >= 7.9)) return true;
+  if(n === "Angela Merkel" && (user.conflict >= 7.2 || user.force >= 6.6 || user.mobilization >= 8.0)) return true;
+  if(n === "Barack Obama" && (user.force >= 6.8 || user.order >= 8.8 && user.mobilization <= 5.0)) return true;
+  if(n === "Bill Clinton" && (user.force >= 6.8 || user.ideology >= 8.8 && user.conflict >= 7.4)) return true;
+  if(n === "Park Chung Hee" && (user.force <= 5.0 || user.order <= 5.6 || user.emotion >= 7.4 || user.mobilization >= 7.2)) return true;
+  if(n === "Fidel Castro" && (user.ideology <= 5.4 || user.mobilization <= 5.6 || user.development >= 7.4)) return true;
+  if(n === "Juan Perón" && (user.mobilization <= 6.0 || user.emotion <= 5.8 || user.logic >= 8.2)) return true;
+  if(n === "Mao Zedong" && (user.mobilization <= 6.0 || user.conflict <= 6.0)) return true;
+  if(n === "Xi Jinping" && (user.development <= 6.0 || user.order <= 6.5)) return true;
+  return false;
+}
+
+function satisfiesMust(user, meta, leader){
+  const n = leader.name;
+  if(n === "Kim Jong Un") return user.power >= 6.0 && user.force >= 6.0 && meta.developmentBias < 6;
+  if(n === "Adolf Hitler") return user.ideology >= 8 && user.mobilization >= 7.0 && user.conflict >= 7.0;
+  if(n === "Joseph Stalin") return user.power >= 6.4 && user.order >= 6.2 && user.force >= 6.4 && user.conflict >= 5.4 && user.development <= 7.8;
+  if(n === "Mahatma Gandhi") return user.conflict <= 5.8 && user.force <= 4.8 && user.ideology >= 6.2;
+  if(n === "Emmanuel Macron") return user.logic >= 7.2 && user.development >= 7.8;
+  if(n === "Nawaf Salam") return user.logic >= 6.0 && user.order >= 6.4 && user.force <= 5.8 && user.development >= 5.8;
+  if(n === "David Cameron") return user.order >= 6.0 && user.logic >= 5.0 && user.conflict <= 4.0 && user.force <= 4.0 && user.conflict <= 4.0;
+  if(n === "John F. Kennedy") return user.emotion >= 6.0 && user.mobilization >= 5.8;
+  if(n === "Joe Biden") return user.order >= 5.6 && user.logic >= 5.2;
+  if(n === "Vladimir Putin") return user.power >= 6.4 && user.logic >= 6.2 && user.force >= 5.8 && user.development <= 7.0;
+  if(n === "Winston Churchill") return user.conflict >= 6.8 && user.mobilization >= 6.3;
+  if(n === "Charles de Gaulle") return user.logic >= 7.8 && user.power >= 6.8 && user.development >= 6.8 && user.conflict >= 5.5;;
+  if(n === "Franklin D. Roosevelt") return user.development >= 6.8 && user.order >= 5.6 && (user.emotion >= 5.4 || user.mobilization >= 5.4) && user.conflict <= 6.8 && user.force <= 7.2;
+  if(n === "Chun Doo-hwan") return user.power >= 6.2 && user.order >= 6.2 && user.force >= 6.8 && user.conflict >= 5.2 && user.emotion <= 6.6 && user.mobilization <= 6.6 && user.development <= 7.4;
+  if(n === "Benito Mussolini") return user.conflict >= 5.0 && user.emotion >= 5.0 && user.ideology >= 5.2 && user.mobilization >= 5.2 && user.logic <= 7.8 && user.development <= 7.4;
+  if(n === "Ho Chi Minh") return user.ideology >= 5.6 && user.mobilization >= 5.6 && user.emotion >= 4.4 && user.conflict >= 3.8 && user.development <= 7.5;
+  if(n === "Angela Merkel") return user.logic >= 6.4 && user.order >= 6.8 && user.development >= 6.2 && user.force <= 5.4 && user.conflict <= 5.4;
+  if(n === "Barack Obama") return user.emotion >= 6.6 && user.mobilization >= 6.6 && user.conflict <= 6.8 && user.force <= 5.8;
+  if(n === "Bill Clinton") return user.logic >= 5.8 && user.emotion >= 5.8 && user.mobilization >= 5.8 && user.development >= 5.8 && user.force <= 6.0;
+  if(n === "Park Chung Hee") return user.power >= 6.2 && user.order >= 6.8 && user.force >= 6.2 && user.development >= 6.8 && user.emotion <= 5.4;
+  if(n === "Fidel Castro") return user.ideology >= 6.8 && user.mobilization >= 7.2 && user.emotion >= 5.8 && user.conflict >= 4.8 && user.development <= 6.4;
+  if(n === "Juan Perón")
+  return user.emotion >= 7.4 &&
+         user.mobilization >= 7.4 &&
+         user.conflict >= 5.8 &&
+         user.ideology >= 6.0 &&
+         user.power >= 5.8 &&
+         user.logic <= 6.2;
+  if(n === "Mao Zedong") return user.ideology >= 6.5 && user.mobilization >= 6.5 && user.conflict >= 6.0;
+  if(n === "Xi Jinping") return user.power >= 6.5 && user.order >= 6.5 && user.development >= 6.5;
+  return true;
+}
+
+function topDimsText(user){
+  const arr = dims.map(k=>({k, v:user[k]})).sort((a,b)=>b.v-a.v).slice(0,3);
+  const map = {
+    power:"Power/Control",
+    logic:"Rational Planning",
+    conflict:"Combativeness",
+    emotion:"Emotional Appeal",
+    order:"Institutional Order",
+    ideology:"Ideology",
+    mobilization:"Mass Mobilization",
+    force:"Coercive Force",
+    development:"Developmental Focus"
+  };
+  return arr.map(x=>map[x.k]).join(", ");
+}
+
+function whyMatched(user, leader, meta){
+  const pairs = dims.map(k=>({k, diff:Math.abs(user[k]-leader.vec[k])})).sort((a,b)=>a.diff-b.diff).slice(0,3);
+  const map = {
+    power:"Power/Control",
+    logic:"Rational Planning",
+    conflict:"Combativeness",
+    emotion:"Emotional Appeal",
+    order:"Institutional Order",
+    ideology:"Ideology",
+    mobilization:"Mass Mobilization",
+    force:"Coercive Force",
+    development:"Developmental Focus"
+  };
+  const biasText = meta.developmentBias >= 5 ? "You clearly prioritize economic, technological, or industrial aspects. " :
+                   (meta.securityBias >= 4 ? "You clearly prioritize security and state capability. " : "");
+  return `${biasText}Ultimately, you match closest with ${leader.name}, primarily because you align closely on ${pairs.map(p=>map[p.k]).join(", ")}. Overall, your style leans heavily toward ${topDimsText(user)}.`;
+}
+
+function placeholderDataUrl(name){
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='360' height='460'><rect width='100%' height='100%' rx='24' fill='#efe2d0'/><rect x='24' y='24' width='312' height='412' rx='18' fill='#f9f1e6' stroke='#d8c7b2'/><text x='50%' y='49%' dominant-baseline='middle' text-anchor='middle' fill='#8a5a3d' font-size='28' font-family='serif'>${name}</text><text x='50%' y='58%' dominant-baseline='middle' text-anchor='middle' fill='#b08a70' font-size='16' font-family='serif'>No Image Found</text></svg>`;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+
+async function setLocalImage(img, slug, name){
+  // Temporarily set the placeholder while loading
+  img.src = placeholderDataUrl(name);
+
+  try {
+    // Call the public Wikipedia API to get the main thumbnail for the leader
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+    const response = await fetch(url);
+    const data = await response.json();
+
+    // Extract the image URL from the deeply nested Wikipedia JSON response
+    const pages = data.query.pages;
+    const pageId = Object.keys(pages)[0];
+
+    if (pages[pageId].thumbnail && pages[pageId].thumbnail.source) {
+      img.src = pages[pageId].thumbnail.source;
+    } else {
+      console.log("No Wikipedia image found for: " + name);
+    }
+  } catch (err) {
+    console.error("Failed to fetch image from Wikipedia:", err);
+  }
+}
+
+/* ===== Ranking Penalty Patch ===== */
+
+const leaderRankingPrefs = {
+  "Park Chung Hee": {
+    avoidBottom: ["Industrial Base","Economic Development","Tech Innovation"]
+  },
+  "Juan Perón": {
+    avoidBottom: ["Industrial Base","Economic Development","Tech Innovation"]
+  },
+  "Charles de Gaulle": {
+    avoidBottom: ["Industrial Base","Economic Development","Tech Innovation","National Security"]
+  },
+  "David Cameron": {
+    avoidBottom: ["Industrial Base","Economic Development","Tech Innovation"]
+  },
+  "Nikita Khrushchev": {
+    avoidBottom: ["Industrial Base","Tech Innovation","National Security"]
+  },
+  "Franklin D. Roosevelt": {
+    avoidBottom: ["Economic Development"]
+  },
+  "Nawaf Salam": {
+    avoidBottom: ["Tech Innovation","Economic Development"]
+  },
+  "Angela Merkel": {
+    avoidBottom: ["Tech Innovation"]
+  },
+  "Emmanuel Macron": {
+    avoidBottom: ["Tech Innovation","Economic Development"]
+  },
+  "Mahatma Gandhi": {
+    avoidBottom: ["Belief System","Cultural Identity"]
+  },
+  "Ho Chi Minh": {
+    avoidBottom: ["Belief System","Cultural Identity","Industrial Base"]
+  },
+  "Adolf Hitler": {
+    avoidBottom: ["Belief System","Cultural Identity"]
+  },
+  "Benito Mussolini": {
+    avoidBottom: ["Belief System","Cultural Identity"]
+  },
+  "Fidel Castro": {
+    avoidBottom: ["Belief System","Cultural Identity"]
+  },
+  "Shinzo Abe": {
+    avoidBottom: ["Belief System","Cultural Identity","Tech Innovation"]
+  },
+  "Vladimir Putin": {
+    avoidBottom: ["National Security"]
+  },
+  "Kim Jong Un": {
+    avoidBottom: ["National Security","Cultural Identity","Belief System"]
+  },
+  "Chun Doo-hwan": {
+    avoidBottom: ["National Security"]
+  },
+  "Mao Zedong": {
+    avoidBottom: ["Belief System","Cultural Identity"]
+  },
+  "Xi Jinping": {
+    avoidBottom: ["National Security","Economic Development"]
+  }
+};
+
+function rankingPenalty(meta, leader){
+  const prefs = leaderRankingPrefs[leader.name];
+  if(!prefs) return 0;
+
+  const items = state["q15"];
+  if(!items || !items.length) return 0;
+
+  let penalty = 0;
+  const last = items.length - 1;
+  const secondLast = items.length - 2;
+
+  function pos(item){
+    return items.indexOf(item);
+  }
+
+  (prefs.avoidBottom || []).forEach(item=>{
+    const p = pos(item);
+
+    if(p === last){
+      penalty += 6.0;   // Core penalty
+    }else if(p === secondLast){
+      penalty += 3;   // Secondary penalty
+    }
+  });
+
+  return penalty;
+}
+
+/* ===== Hook Injection ===== */
+
+const __oldMustPenalty = mustPenalty;
+
+mustPenalty = function(user, meta, leader){
+  return __oldMustPenalty(user, meta, leader) + rankingPenalty(meta, leader);
+};
+
+function getOrCreateSid(){
+  let sid = localStorage.getItem("sid");
+  if(!sid){
+    sid = crypto.randomUUID();
+    localStorage.setItem("sid", sid);
+  }
+  return sid;
+}
+
+function sendAnalytics(user, meta, results){
+  fetch(`https://leadertest.whoareu.workers.dev/api/log`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      sid: getOrCreateSid(),
+      ts: Date.now(),
+      user,
+      ranking: state["q15"],
+      result: results.slice(0,3).map(x => x.leader.name)
+    })
+  }).catch(err => {
+    console.error("Failed to upload stats:", err);
+  });
+}
+
+function renderResult(){
+  if(!lockedQuadrant) lockedQuadrant = determineQuadrant();
+  const built = buildUserVector();
+  const user = built.user;
+  const meta = built.meta;
+
+  const userTypes = getUserTypes(user);
+
+  function scoreLeader(l, extraPenalty = 0){
+    const dist = weightedDistance(user, l);
+    const diff = Math.abs(distinctiveness(user) - distinctiveness(l.vec));
+    const score = dist + diff * 0.32 + centerPenalty(l) + extremenessPenalty(l) + balanceAdjustment(l) + profileAdjustment(user, l) + mustPenalty(user, meta, l) + extraPenalty;
+    return {leader:l, score};
+  }
+
+  function mergeCandidateLists(...lists){
+    const bestByName = new Map();
+    lists.flat().forEach(item => {
+      const key = item.leader.name;
+      if(!bestByName.has(key) || item.score < bestByName.get(key).score){
+        bestByName.set(key, item);
+      }
+    });
+    return Array.from(bestByName.values()).sort((a,b)=>a.score-b.score);
+  }
+
+  let baseCandidates = leaders
+    .filter(l => l.quadrant === lockedQuadrant)
+    .filter(l => matchesUserTypes(l, userTypes))
+    .filter(l => !violatesVeto(user, meta, l))
+    .filter(l => passesBalanceLock(user, l))
+    .map(l => scoreLeader(l))
+    .sort((a,b)=>a.score-b.score);
+
+  if(baseCandidates.length < 3){
+    const relaxedTypeSameVeto = leaders
+      .filter(l => l.quadrant === lockedQuadrant)
+      .filter(l => matchesUserTypes(l, userTypes))
+      .filter(l => !violatesVeto(user, meta, l))
+      .filter(l => passesBalanceLock(user, l))
+      .map(l => scoreLeader(l));
+
+    const relaxedQuadrantVeto = leaders
+      .filter(l => l.quadrant === lockedQuadrant)
+      .filter(l => !violatesVeto(user, meta, l))
+      .filter(l => passesBalanceLock(user, l))
+      .map(l => scoreLeader(l, matchesUserTypes(l, userTypes) ? 0 : 0.7));
+
+    baseCandidates = mergeCandidateLists(
+      baseCandidates,
+      relaxedTypeSameVeto,
+      relaxedQuadrantVeto
+    );
+  }
+
+  let unlockApplied = applyUnlockWindow(user, baseCandidates);
+  let results = unlockApplied.candidates.slice().sort((a,b)=>a.score-b.score);
+  results = applyLocalRankingTiebreak(results, meta);
+
+  if(results.length < 2){
+    const extraTolerances = [2.5, 3];
+    let expanded = null;
+    for(const t of extraTolerances){
+      const maybe = baseCandidates.filter(x => passesUnlock(user, x.leader, t));
+      if(maybe.length >= 2){
+        expanded = maybe;
+        break;
+      }
+    }
+    if(expanded){
+      results = expanded.slice().sort((a,b)=>a.score-b.score);
+      results = applyLocalRankingTiebreak(results, meta);
+    }
+  }
+
+  if(results.length === 0){
+    results = leaders
+      .filter(l => l.quadrant === lockedQuadrant)
+      .map(l=>{
+        const dist = weightedDistance(user, l);
+        const diff = Math.abs(distinctiveness(user) - distinctiveness(l.vec));
+        const score = dist + diff * 0.32 + centerPenalty(l) + extremenessPenalty(l) + 4.0;
+        return {leader:l, score};
+      })
+      .sort((a,b)=>a.score-b.score);
+  }
+
+  results = applyLocalRankingTiebreak(results, meta);
+
+  const best = results[0].leader;
+  sendAnalytics(user, meta, results);
+
+  document.getElementById("resultWrap").style.display = "block";
+  document.getElementById("restartBtn").style.display = "block";
+  document.getElementById("leaderName").textContent = best.name;
+  document.getElementById("leaderBio").textContent = best.bio;
+  document.getElementById("leaderSummary").textContent = best.summary;
+  document.getElementById("whyText").textContent = whyMatched(user, best, meta);
+  document.getElementById("shareText").textContent = `I tested as being most like ${best.name} —— ${best.bio}. You should try it too!`;
+
+  document.getElementById("leaderBadges").innerHTML = `
+    <span class="pill">Unique Match</span>
+    <span class="pill">Multi-dimensional Alignment</span>
+  `;
+
+  const axes = [
+    ["Power", best.vec.power],
+    ["Logic", best.vec.logic],
+    ["Conflict", best.vec.conflict],
+    ["Emotion", best.vec.emotion],
+    ["Order", best.vec.order],
+    ["Ideology", best.vec.ideology],
+    ["Mobilization", best.vec.mobilization],
+    ["Force", best.vec.force],
+    ["Development", best.vec.development]
+  ];
+  document.getElementById("leaderAxes").innerHTML = axes.map(([n,v])=>`<span class="pill">${n} ${v}</span>`).join("");
+
+  const top = document.getElementById("topMatches");
+  top.innerHTML = "";
+  results.slice(1,3).forEach((r, i)=>{
+    const d = document.createElement("div");
+    d.className = "mini-card";
+    d.innerHTML = `<strong>#${i+2} ${r.leader.name}</strong><p style="margin:8px 0 0;color:var(--muted)">${r.leader.bio}</p>`;
+    top.appendChild(d);
+  });
+
+  const img = document.getElementById("leaderImg");
+  setLocalImage(img, best.slug, best.name);
+
+  window.scrollTo({top:document.getElementById("resultWrap").offsetTop - 16, behavior:"smooth"});
+}
+
+document.getElementById("prevBtn").addEventListener("click", ()=>{
+  if(phase === "quadrant"){
+    if(currentIndex > 0){
+      currentIndex -= 1;
+      renderCurrentQuestion();
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+    return;
+  }
+
+  if(currentIndex > 0){
+    currentIndex -= 1;
+    renderCurrentQuestion();
+  }else{
+    phase = "quadrant";
+    currentIndex = quadrantQuestions.length - 1;
+    renderCurrentQuestion();
+  }
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+document.getElementById("nextBtn").addEventListener("click", ()=>{
+  if(phase === "quadrant"){
+    if(currentIndex < quadrantQuestions.length - 1){
+      currentIndex += 1;
+      renderCurrentQuestion();
+    }else{
+      lockedQuadrant = determineQuadrant();
+      phase = "main";
+      currentIndex = 0;
+      renderCurrentQuestion();
+    }
+    window.scrollTo({top:0, behavior:"smooth"});
+    return;
+  }
+
+  if(currentIndex < questions.length - 1){
+    currentIndex += 1;
+    renderCurrentQuestion();
+    window.scrollTo({top:0, behavior:"smooth"});
+  }else{
+    renderResult();
+  }
+});
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  initState();
+  renderCurrentQuestion();
+  document.getElementById("resultWrap").style.display = "none";
+  document.getElementById("restartBtn").style.display = "none";
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+document.getElementById("restartBtn").addEventListener("click", ()=>{
+  initState();
+  renderCurrentQuestion();
+  document.getElementById("resultWrap").style.display = "none";
+  document.getElementById("restartBtn").style.display = "none";
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+document.getElementById("restartBtn").style.display = "none";
+
+renderCurrentQuestion();
+</script>
+
+</body>
+</html>
