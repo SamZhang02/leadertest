@@ -1261,24 +1261,6 @@ function getOrCreateSid(){
   return sid;
 }
 
-function sendAnalytics(user, meta, results){
-  fetch(`https://leadertest.whoareu.workers.dev/api/log`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      sid: getOrCreateSid(),
-      ts: Date.now(),
-      user,
-      ranking: state["q15"],
-      result: results.slice(0,3).map(x => x.leader.name)
-    })
-  }).catch(err => {
-    console.error("Failed to upload stats:", err);
-  });
-}
-
 function renderResult(){
   if(!lockedQuadrant) lockedQuadrant = determineQuadrant();
   const built = buildUserVector();
@@ -1369,7 +1351,6 @@ function renderResult(){
   results = applyLocalRankingTiebreak(results, meta);
 
   const best = results[0].leader;
-  sendAnalytics(user, meta, results);
 
   document.getElementById("resultWrap").style.display = "block";
   document.getElementById("restartBtn").style.display = "block";
